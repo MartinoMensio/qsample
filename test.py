@@ -22,7 +22,7 @@ def clear_folders():
 
 def read_docs(path):
     with open(path) as f:
-        return [l.strip() for l in f]
+        return [l.strip().replace('\\n', '\n') for l in f]
 
 
 def write_docs(docs):
