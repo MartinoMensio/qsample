@@ -26,6 +26,8 @@ import ims.cs.qsample.features.FeatureExtraction;
 import ims.cs.util.NewStaticPrinter;
 import ims.cs.qsample.spans.Span;
 import ims.cs.util.StaticConfig;
+import ims.cs.util.StaticConfig.CliMode;
+
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -114,6 +116,41 @@ public class ProcessedCorpus {
         return transformDocumentList(corpus.getDev().docList.subList(0, size));
     }
 
+    /**
+     * Outputs document predictions to {@code System.out}. Format is one word per line, BIOEC annotations.
+     * @param documents
+     * @param newLineAtSentenceEnd
+     * @throws IOException
+     */
+    public static void outputPredictions(List<Document> documents, boolean newLineAtSentenceEnd) {
+        for (Document document : documents) {
+            boolean inSpan = false;
+
+            for (Token token : document.tokenList) {
+                String bioLabelPred = "O";
+                boolean spanStarts = token.startsPredictedContentSpan();
+                boolean spanEnds = token.endsPredictedContentSpan();
+
+                if (spanStarts) {
+                    inSpan = true;
+                    bioLabelPred = "B";
+                } else if (spanEnds) {
+                    inSpan = false;
+                    bioLabelPred = "E";
+                } else if (inSpan) {
+                    bioLabelPred = "I";
+                } else if (token.isPredictedCue) {
+                    bioLabelPred = "C";
+                }
+
+                String text = token.originalPredText != null ? token.originalPredText : token.predText;
+
+                System.out.println(text + "\t" + token.predByteCount.begin + "\t" + token.predByteCount.end + "\t"
+                        + token.contentBIOAnnotationGold + "\t" + bioLabelPred);
+                if (newLineAtSentenceEnd && token.endsSentence()) System.out.println();
+            }
+        }
+    }
 
     /**
      * Stores document predictions in a file. Format is one word per line, BIOE annotations.

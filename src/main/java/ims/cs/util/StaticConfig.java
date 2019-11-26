@@ -32,7 +32,7 @@ import java.util.Properties;
  */
 public abstract class StaticConfig {
     public enum Model {CRF, GREEDY, SAMPLE}
-    public enum CliMode {TRAIN, TEST, TEXT}
+    public enum CliMode {TRAIN, TEST, TEXT, CONSOLE}
 
     // FEATURES
     // - syntactic

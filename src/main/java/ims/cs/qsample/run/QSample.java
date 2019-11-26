@@ -19,18 +19,27 @@ package ims.cs.qsample.run;
 
 
 import ims.cs.lingdata.Document;
+import ims.cs.lingdata.PlainTextCorpus;
 import ims.cs.parc.PARCCorpus;
 import ims.cs.parc.ProcessedCorpus;
+import ims.cs.qsample.greedysample.HeuristicSampler;
+import ims.cs.qsample.greedysample.PerceptronSampler;
 import ims.cs.qsample.models.CrfClassifier;
 import ims.cs.qsample.models.QuotationPerceptrons;
 import ims.cs.util.MultiOutputStream;
 import ims.cs.util.NewStaticPrinter;
 import ims.cs.util.StaticConfig;
+import ims.cs.util.StaticConfig.CliMode;
+
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,6 +59,7 @@ public class QSample {
         System.out.println("options:\n" +
                 "  Predict spans for text files in <input dir>, write results into <output dir>:\n" +
                 "    --sample <input dir> <output dir>    use semi-Markov sampler (best method)\n" +
+                "    --console                            use semi-Markov sampler with stdin/stdout\n" +
                 "    --crf <input dir> <output dir>       use CRF model\n" +
                 "    --greedy <input dir> <output dir>    greedy model\n" +
                 "\n  Run as specified in configuration file\n" +
@@ -78,6 +88,30 @@ public class QSample {
         System.out.println("Going to process all files in " + inputDirectoryName);
 
         // set output directory
+        StaticConfig.outputDirectory = outputDirectoryName;
+        File directory = new File(String.valueOf(outputDirectoryName));
+        if (!directory.exists()) directory.mkdir();
+    }
+
+    /**
+     * Sets the parameters to be able to read input from stdin and write to stdout.
+     * 
+     * @throws IOException
+     */
+    public static void setConsoleMode() throws IOException {
+        // load configuration
+        StaticConfig.loadConfig("resources/PARC/configs/predpipeline.sampling.prop");
+
+        // set options
+        // (this will overwrite some options that may have been set differently in the config file)
+        StaticConfig.cliMode = StaticConfig.CliMode.CONSOLE;
+        StaticConfig.useGoldPreprocessing = false;   /* gold data not available for console mode */
+        StaticConfig.oneFilePerInput = false;
+
+        System.out.println("Entering console mode, reading from stdin and printing to stdout");
+
+        // set output directory
+        String outputDirectoryName = "log";
         StaticConfig.outputDirectory = outputDirectoryName;
         File directory = new File(String.valueOf(outputDirectoryName));
         if (!directory.exists()) directory.mkdir();
@@ -127,6 +161,13 @@ public class QSample {
 
             StaticConfig.modelForTextFileMode = StaticConfig.Model.GREEDY;
             setTextFileMode(args[1], args[2]);
+        } else if (args[0].equals("--console")) {
+            if (args.length != 1) {
+                printHelp("Wrong number of arguments");
+            }
+
+            StaticConfig.modelForTextFileMode = StaticConfig.Model.SAMPLE;
+            setConsoleMode();
         } else {   /* Unknown option */
             System.out.println("Unknown option: " + args[0] + "\n");
             printHelp();
@@ -200,6 +241,38 @@ public class QSample {
                 // run experiment
                 RunPerceptronSampler.runPsPipeline(null, testDocs, null, null,
                         StaticConfig.beginMargin, StaticConfig.endMargin, StaticConfig.cueMargin, perceptrons);
+            }
+        } else if (StaticConfig.cliMode == CliMode.CONSOLE) {
+            // load common model
+            QuotationPerceptrons perceptrons = Common.deserializeModels(StaticConfig.perceptronModelFile);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            String line;
+            String currentDocument = "";
+            System.out.println("STARTED -- Now reading input...");
+            while((line = reader.readLine()) != null) {
+                if (line.length() == 0) {
+                    Document document = PlainTextCorpusReader.readDocument(currentDocument);
+                    HeuristicSampler heuristicSampler = new HeuristicSampler();
+                    heuristicSampler.sampleGreedy(document, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
+                    PerceptronSampler perceptronSampler = new PerceptronSampler(perceptrons);
+
+                    PlainTextCorpus corpus = new PlainTextCorpus(Arrays.asList(document));
+                    ProcessedCorpus processedCorpus = new ProcessedCorpus(corpus);
+
+                    List<Document> testDocs = processedCorpus.getTest();
+
+                    perceptrons.predictionPipelineCue(null, testDocs, null, null);
+                    perceptrons.predictionPipelineBoundary(null, testDocs, null, null);
+                    heuristicSampler.sampleGreedy(testDocs, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
+                    RunPerceptronSampler.predict(testDocs, perceptronSampler, heuristicSampler);
+                    System.out.println("OUTPUT_START");
+                    ProcessedCorpus.outputPredictions(testDocs, true);
+                    System.out.println("OUTPUT_END");
+                    currentDocument = "";
+                } else {
+                    currentDocument += line + "\n";
+                }
             }
         } else if (StaticConfig.cliMode == StaticConfig.CliMode.TRAIN) {   /* we are in training mode now */
             // load data
