@@ -85,6 +85,40 @@ labels. The label `C` marks the occurrence of a _cue_, and all words
 between the `B` (begin) and `E` (end) tag are the _content_ of the
 quotation.
 
+### Console Mode
+
+If you run the jar file with `--console` option, QSample will run in
+interactive mode, taking input from stdin and writing output to stdout.
+
+STARTED will mark the beginning of the line where QSample starts accepting
+input.
+
+QSample will record the input until an empty line is given, and process
+the input afterwards. This allows inputting multiple lines.
+
+OUTPUT_START marks the beginning of the output
+
+OUTPUT_END marks the end of the output
+
+Example:
+
+> STARTED -- Now reading input...
+> Boris Johnson claimed that the NHS will hire 50000 new nurses
+> 
+> OUTPUT_START
+> Boris 0	5	O	O
+> Johnson	6	13	O	O
+> claimed	14	21	O	C
+> that	22	26	O	B
+> the	27	30	O	I
+> NHS	31	34	O	I
+> will	35	39	O	I
+> hire	40	44	O	I
+> 50000	45	50	O	I
+> new	51	54	O	I
+> nurses	55	61	O	E
+> OUTPUT_END
+
 ## Data
 
 This repository includes the following data:
