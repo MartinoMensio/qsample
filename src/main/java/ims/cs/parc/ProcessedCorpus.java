@@ -26,7 +26,6 @@ import ims.cs.qsample.features.FeatureExtraction;
 import ims.cs.util.NewStaticPrinter;
 import ims.cs.qsample.spans.Span;
 import ims.cs.util.StaticConfig;
-import ims.cs.util.StaticConfig.CliMode;
 
 import org.xml.sax.SAXException;
 
