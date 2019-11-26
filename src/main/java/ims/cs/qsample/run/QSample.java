@@ -267,7 +267,7 @@ public class QSample {
                     heuristicSampler.sampleGreedy(testDocs, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
                     RunPerceptronSampler.predict(testDocs, perceptronSampler, heuristicSampler);
                     System.out.println("OUTPUT_START");
-                    ProcessedCorpus.outputPredictions(testDocs, true);
+                    ProcessedCorpus.outputPredictions(testDocs);
                     System.out.println("OUTPUT_END");
                     currentDocument = "";
                 } else {

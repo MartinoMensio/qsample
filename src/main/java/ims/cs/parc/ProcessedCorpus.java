@@ -118,10 +118,9 @@ public class ProcessedCorpus {
     /**
      * Outputs document predictions to {@code System.out}. Format is one word per line, BIOEC annotations.
      * @param documents
-     * @param newLineAtSentenceEnd
      * @throws IOException
      */
-    public static void outputPredictions(List<Document> documents, boolean newLineAtSentenceEnd) {
+    public static void outputPredictions(List<Document> documents) {
         for (Document document : documents) {
             boolean inSpan = false;
 
@@ -146,7 +145,6 @@ public class ProcessedCorpus {
 
                 System.out.println(text + "\t" + token.predByteCount.begin + "\t" + token.predByteCount.end + "\t"
                         + token.contentBIOAnnotationGold + "\t" + bioLabelPred);
-                if (newLineAtSentenceEnd && token.endsSentence()) System.out.println();
             }
         }
     }
