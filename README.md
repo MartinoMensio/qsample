@@ -101,10 +101,10 @@ OUTPUT_START marks the beginning of the output
 OUTPUT_END marks the end of the output
 
 Example:
-
+```
 > STARTED -- Now reading input...
 > Boris Johnson claimed that the NHS will hire 50000 new nurses
-> 
+>
 > OUTPUT_START
 > Boris 0	5	O	O
 > Johnson	6	13	O	O
@@ -118,6 +118,7 @@ Example:
 > new	51	54	O	I
 > nurses	55	61	O	E
 > OUTPUT_END
+```
 
 ## Data
 
