@@ -46,6 +46,8 @@ import java.util.List;
  */
 public class QSample {
 
+    public static final String DEFAULT_OUTPUT_DIRECTORY_NAME = "log";
+
     /**
      * Print some info text to the shell
      */
@@ -107,7 +109,7 @@ public class QSample {
         System.out.println("Entering console mode, reading from stdin and printing to stdout");
 
         // set output directory
-        String outputDirectoryName = StaticConfig.DEFAULT_OUTPUT_DIRECTORY_NAME;
+        String outputDirectoryName = DEFAULT_OUTPUT_DIRECTORY_NAME;
         StaticConfig.outputDirectory = outputDirectoryName;
         File directory = new File(outputDirectoryName);
         if (!directory.exists()) directory.mkdir();
