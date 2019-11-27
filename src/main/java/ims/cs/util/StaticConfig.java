@@ -20,7 +20,6 @@ package ims.cs.util;
 import sun.applet.Main;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -31,8 +30,9 @@ import java.util.Properties;
  * Created by scheibcn on 5/30/16.
  */
 public abstract class StaticConfig {
+
     public enum Model {CRF, GREEDY, SAMPLE}
-    public enum CliMode {TRAIN, TEST, TEXT}
+    public enum CliMode {TRAIN, TEST, TEXT, CONSOLE}
 
     // FEATURES
     // - syntactic

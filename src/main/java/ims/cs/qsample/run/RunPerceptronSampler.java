@@ -18,6 +18,7 @@
 package ims.cs.qsample.run;
 
 import ims.cs.lingdata.Document;
+import ims.cs.lingdata.PlainTextCorpus;
 import ims.cs.parc.PARCCorpus;
 import ims.cs.parc.ProcessedCorpus;
 import ims.cs.qsample.evaluate.EvaluateSpan;
@@ -33,6 +34,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,6 +54,37 @@ public class RunPerceptronSampler {
         for (Document document : documents) document.predictedSpanSet.clear();
         if (documents != null) heuristicSampler.sampleGreedy(documents, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
         perceptronSampler.sampleAndScoreBeginEnd(documents, false, StaticConfig.predictionIter);
+    }
+    
+    /**
+     * Run the full pipeline for given text and return predictions
+     * 
+     * @param text
+     * @param perceptrons
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws ClassNotFoundException
+     */
+    public static Document runPsPipeline(String text, QuotationPerceptrons perceptrons)
+            throws IOException, SAXException, ParserConfigurationException, ClassNotFoundException {
+        Document document = PlainTextCorpusReader.readDocument(text);
+        HeuristicSampler heuristicSampler = new HeuristicSampler();
+        heuristicSampler.sampleGreedy(document, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
+        PerceptronSampler perceptronSampler = new PerceptronSampler(perceptrons);
+
+        PlainTextCorpus corpus = new PlainTextCorpus(Arrays.asList(document));
+        ProcessedCorpus processedCorpus = new ProcessedCorpus(corpus);
+
+        List<Document> testDocs = processedCorpus.getTest();
+
+        perceptrons.predictionPipelineCue(null, testDocs, null, null);
+        perceptrons.predictionPipelineBoundary(null, testDocs, null, null);
+        heuristicSampler.sampleGreedy(testDocs, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
+        RunPerceptronSampler.predict(testDocs, perceptronSampler, heuristicSampler);
+
+        return testDocs.get(0);
     }
 
     /**
