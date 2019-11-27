@@ -19,11 +19,8 @@ package ims.cs.qsample.run;
 
 
 import ims.cs.lingdata.Document;
-import ims.cs.lingdata.PlainTextCorpus;
 import ims.cs.parc.PARCCorpus;
 import ims.cs.parc.ProcessedCorpus;
-import ims.cs.qsample.greedysample.HeuristicSampler;
-import ims.cs.qsample.greedysample.PerceptronSampler;
 import ims.cs.qsample.models.CrfClassifier;
 import ims.cs.qsample.models.QuotationPerceptrons;
 import ims.cs.util.MultiOutputStream;
@@ -39,7 +36,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -89,7 +85,7 @@ public class QSample {
 
         // set output directory
         StaticConfig.outputDirectory = outputDirectoryName;
-        File directory = new File(String.valueOf(outputDirectoryName));
+        File directory = new File(outputDirectoryName);
         if (!directory.exists()) directory.mkdir();
     }
 
@@ -111,9 +107,9 @@ public class QSample {
         System.out.println("Entering console mode, reading from stdin and printing to stdout");
 
         // set output directory
-        String outputDirectoryName = "log";
+        String outputDirectoryName = StaticConfig.DEFAULT_OUTPUT_DIRECTORY_NAME;
         StaticConfig.outputDirectory = outputDirectoryName;
-        File directory = new File(String.valueOf(outputDirectoryName));
+        File directory = new File(outputDirectoryName);
         if (!directory.exists()) directory.mkdir();
     }
 
@@ -248,30 +244,18 @@ public class QSample {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line;
-            String currentDocument = "";
+            StringBuilder currentDocument = new StringBuilder();
             System.out.println("STARTED -- Now reading input...");
             while((line = reader.readLine()) != null) {
                 if (line.length() == 0) {
-                    Document document = PlainTextCorpusReader.readDocument(currentDocument);
-                    HeuristicSampler heuristicSampler = new HeuristicSampler();
-                    heuristicSampler.sampleGreedy(document, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
-                    PerceptronSampler perceptronSampler = new PerceptronSampler(perceptrons);
-
-                    PlainTextCorpus corpus = new PlainTextCorpus(Arrays.asList(document));
-                    ProcessedCorpus processedCorpus = new ProcessedCorpus(corpus);
-
-                    List<Document> testDocs = processedCorpus.getTest();
-
-                    perceptrons.predictionPipelineCue(null, testDocs, null, null);
-                    perceptrons.predictionPipelineBoundary(null, testDocs, null, null);
-                    heuristicSampler.sampleGreedy(testDocs, StaticConfig.maxCueDistanceHeuristic, StaticConfig.maxLengthHeuristic);
-                    RunPerceptronSampler.predict(testDocs, perceptronSampler, heuristicSampler);
+                    Document result = RunPerceptronSampler.runPsPipeline(currentDocument.toString(), perceptrons);
                     System.out.println("OUTPUT_START");
-                    ProcessedCorpus.outputPredictions(testDocs);
+                    ProcessedCorpus.outputPrediction(result);
                     System.out.println("OUTPUT_END");
-                    currentDocument = "";
+                    currentDocument.setLength(0);
                 } else {
-                    currentDocument += line + "\n";
+                    currentDocument.append(line);
+                    currentDocument.append("\n");
                 }
             }
         } else if (StaticConfig.cliMode == StaticConfig.CliMode.TRAIN) {   /* we are in training mode now */

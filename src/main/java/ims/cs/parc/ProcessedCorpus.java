@@ -117,35 +117,33 @@ public class ProcessedCorpus {
 
     /**
      * Outputs document predictions to {@code System.out}. Format is one word per line, BIOEC annotations.
-     * @param documents
+     * @param document
      * @throws IOException
      */
-    public static void outputPredictions(List<Document> documents) {
-        for (Document document : documents) {
-            boolean inSpan = false;
+    public static void outputPrediction(Document document) {
+        boolean inSpan = false;
 
-            for (Token token : document.tokenList) {
-                String bioLabelPred = "O";
-                boolean spanStarts = token.startsPredictedContentSpan();
-                boolean spanEnds = token.endsPredictedContentSpan();
+        for (Token token : document.tokenList) {
+            String bioLabelPred = "O";
+            boolean spanStarts = token.startsPredictedContentSpan();
+            boolean spanEnds = token.endsPredictedContentSpan();
 
-                if (spanStarts) {
-                    inSpan = true;
-                    bioLabelPred = "B";
-                } else if (spanEnds) {
-                    inSpan = false;
-                    bioLabelPred = "E";
-                } else if (inSpan) {
-                    bioLabelPred = "I";
-                } else if (token.isPredictedCue) {
-                    bioLabelPred = "C";
-                }
-
-                String text = token.originalPredText != null ? token.originalPredText : token.predText;
-
-                System.out.println(text + "\t" + token.predByteCount.begin + "\t" + token.predByteCount.end + "\t"
-                        + token.contentBIOAnnotationGold + "\t" + bioLabelPred);
+            if (spanStarts) {
+                inSpan = true;
+                bioLabelPred = "B";
+            } else if (spanEnds) {
+                inSpan = false;
+                bioLabelPred = "E";
+            } else if (inSpan) {
+                bioLabelPred = "I";
+            } else if (token.isPredictedCue) {
+                bioLabelPred = "C";
             }
+
+            String text = token.originalPredText != null ? token.originalPredText : token.predText;
+
+            System.out.println(String.join("\t", text, String.valueOf(token.predByteCount.begin),
+                    String.valueOf(token.predByteCount.end), token.contentBIOAnnotationGold, bioLabelPred));
         }
     }
 
