@@ -247,7 +247,7 @@ public class QSample {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             StringBuilder currentDocument = new StringBuilder();
-            System.out.println("STARTED -- Now reading input...");
+            System.out.println("STARTED");
             while((line = reader.readLine()) != null) {
                 if (line.length() == 0) {
                     Document result = RunPerceptronSampler.runPsPipeline(currentDocument.toString(), perceptrons);

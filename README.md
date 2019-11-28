@@ -102,7 +102,7 @@ OUTPUT_END marks the end of the output
 
 Example:
 ```
-> STARTED -- Now reading input...
+> STARTED
 > Boris Johnson claimed that the NHS will hire 50000 new nurses
 >
 > OUTPUT_START
