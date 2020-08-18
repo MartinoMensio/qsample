@@ -34,6 +34,52 @@ import java.util.List;
 public class PlainTextCorpusReader {
 
     /**
+     * Read document from string, one sentence per line
+     * @param file
+     * @return
+     */
+    public static Document readDocument(String input) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new StringReader(input));
+
+        // read all text from file
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+            sb.append('\n');
+        }
+
+        // build a document with some bogus structure
+        String text = sb.toString();
+
+        Document d = new Document();
+        Sentence s = new Sentence();
+        Token t = new Token();
+
+        // add text and set byte count
+        t.goldText = text;
+        t.goldByteCount = new ByteCount(0, t.goldText.length());
+
+        // bookkeeping
+        s.tokenList = new ArrayList<>();
+        s.tokenList.add(t);
+
+        d.sentenceList = new ArrayList<>();
+        d.sentenceList.add(s);
+
+        d.tokenList = new ArrayList<>();
+        d.tokenList.add(t);
+        d.text = text;
+
+        // build a document id
+        d.docId = new PlainTextDocId("string", String.valueOf(input.hashCode()));
+
+        reader.close();
+
+        return d;
+    }
+
+    /**
      * Read document, one sentence per line
      * @param file
      * @return

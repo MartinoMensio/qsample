@@ -26,6 +26,7 @@ import ims.cs.qsample.features.FeatureExtraction;
 import ims.cs.util.NewStaticPrinter;
 import ims.cs.qsample.spans.Span;
 import ims.cs.util.StaticConfig;
+
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -114,6 +115,37 @@ public class ProcessedCorpus {
         return transformDocumentList(corpus.getDev().docList.subList(0, size));
     }
 
+    /**
+     * Outputs document predictions to {@code System.out}. Format is one word per line, BIOEC annotations.
+     * @param document
+     * @throws IOException
+     */
+    public static void outputPrediction(Document document) {
+        boolean inSpan = false;
+
+        for (Token token : document.tokenList) {
+            String bioLabelPred = "O";
+            boolean spanStarts = token.startsPredictedContentSpan();
+            boolean spanEnds = token.endsPredictedContentSpan();
+
+            if (spanStarts) {
+                inSpan = true;
+                bioLabelPred = "B";
+            } else if (spanEnds) {
+                inSpan = false;
+                bioLabelPred = "E";
+            } else if (inSpan) {
+                bioLabelPred = "I";
+            } else if (token.isPredictedCue) {
+                bioLabelPred = "C";
+            }
+
+            String text = token.originalPredText != null ? token.originalPredText : token.predText;
+
+            System.out.println(String.join("\t", text, String.valueOf(token.predByteCount.begin),
+                    String.valueOf(token.predByteCount.end), token.contentBIOAnnotationGold, bioLabelPred));
+        }
+    }
 
     /**
      * Stores document predictions in a file. Format is one word per line, BIOE annotations.
