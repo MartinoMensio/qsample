@@ -5,11 +5,13 @@
   <name>QSample</name>
   <groupId>ims.cs</groupId>
   <artifactId>qsample</artifactId>
-  <version>0.1</version>
-  <inceptionYear>2016</inceptionYear>
+  <version>0.2</version>
+  <inceptionYear>2020</inceptionYear>
   <properties>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
     <junit.version>4.10</junit.version>
+    <springboot.version>2.3.3.RELEASE</springboot.version>
+    <start-class>ims.cs.qsample.rest.RestApplication</start-class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <organization>
@@ -19,6 +21,25 @@
 
   
   <dependencies>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>${springboot.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>${springboot.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -66,6 +87,19 @@
     <plugins>
 
         <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${springboot.version}</version>
+          <executions>
+            <execution>
+             <goals>
+              <goal>repackage</goal>
+             </goals>
+            </execution>
+           </executions>
+        </plugin>
+
+        <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.5.1</version>
@@ -77,7 +111,7 @@
 
 
       <!-- Assembles the jar and other release formats (tarball, etc.). -->
-      <plugin>
+      <!-- <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
           <version>2.6</version>
           <executions>
@@ -90,16 +124,17 @@
           </execution>
         </executions>
         <configuration>
-	  <archive>
-	    <manifest>
-	      <mainClass>ims.cs.qsample.run.QSample</mainClass>
-	    </manifest>
-	  </archive>
-	  <descriptorRefs>
-	    <descriptorRef>jar-with-dependencies</descriptorRef>
-	  </descriptorRefs>
+          <archive>
+            <manifest>
+              OLD: <mainClass>ims.cs.qsample.run.QSample</mainClass> 
+              <mainClass>ims.cs.qsample.rest.RestApplication</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
         </configuration>
-      </plugin>
+      </plugin> -->
 
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -117,7 +152,8 @@
                 </excludes>
                 <archive>
                     <manifest>
-                        <mainClass>ims.cs.qsample.run.QSample</mainClass>
+                        <!-- <mainClass>ims.cs.qsample.run.QSample</mainClass> -->
+                        <mainClass>ims.cs.qsample.rest.RestApplication</mainClass>
                     </manifest>
                 </archive>
             </configuration>
