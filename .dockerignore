@@ -1,0 +1,7 @@
+# Ignore everything
+**
+
+# Allow JARs
+!/target/*.jar
+# Allow resources
+!/resources/**
