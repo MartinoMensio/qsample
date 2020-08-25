@@ -19,9 +19,10 @@ tar xzfv models.tar.gz
 # java -jar target/qsample-0.1-jar-with-dependencies.jar --sample example/documents/ output
 
 
-docker build -t qsample .
-docker run -it --rm --name qsample -p 8080:8080 qsample
+docker build -t martinomensio/qsample .
+docker run -it --name qsample -p 8080:8080 martinomensio/qsample
+# docker start qsample
 
 
-# # run rest
+# # run rest without docker
 # java -jar target/qsample-0.2.jar 
